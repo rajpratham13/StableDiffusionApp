@@ -28,7 +28,11 @@ pipe.enable_vae_slicing()
 # ---- RENDER HOMEPAGE ----
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return send_file("index.html")  # Look in the root directory now
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
 
 
 # ---- IMAGE GENERATION ENDPOINT ----
