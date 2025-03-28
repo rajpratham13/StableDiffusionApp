@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stable Diffusion Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+        }
+        label {
+            margin-top: 10px;
+            display: block;
+        }
+        input, button {
+            margin-top: 5px;
+            width: 100%;
+            padding: 10px;
+        }
+        img {
+            margin-top: 20px;
+            width: 100%;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Stable Diffusion Image Generator</h1>
+        <label for="prompt">Enter Prompt:</label>
+        <input type="text" id="prompt" placeholder="A beautiful landscape">
+        
+        <label for="negative_prompt">Negative Prompt:</label>
+        <input type="text" id="negative_prompt" placeholder="Leave blank if not needed">
+
+        <label for="num_inference_steps">Number of Inference Steps:</label>
+        <input type="number" id="num_inference_steps" value="50" min="1" max="100">
+        
+        <label for="height">Height:</label>
+        <input type="number" id="height" value="512" min="256" max="1024">
+        
+        <label for="width">Width:</label>
+        <input type="number" id="width" value="512" min="256" max="1024">
+        
+        <label for="num_images_per_prompt">Number of Images per Prompt:</label>
+        <input type="number" id="num_images_per_prompt" value="1" min="1" max="5">
+        
+        <button onclick="generateImage()">Generate Image</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function generateImage() {
+            const prompt = document.getElementById("prompt").value;
+            const negative_prompt = document.getElementById("negative_prompt").value;
+            const num_inference_steps = parseInt(document.getElementById("num_inference_steps").value);
+            const height = parseInt(document.getElementById("height").value);
+            const width = parseInt(document.getElementById("width").value);
+            const num_images_per_prompt = parseInt(document.getElementById("num_images_per_prompt").value);
+            
+            const data = {
+                prompt, 
+                negative_prompt, 
+                num_inference_steps,
+                height,
+                width,
+                num_images_per_prompt
+            };
+            
+            const response = await fetch("/generate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "";
+            
+            if (result.success) {
+                result.paths.forEach(path => {
+                    const img = document.createElement("img");
+                    img.src = path;
+                    resultDiv.appendChild(img);
+                });
+            } else {
+                resultDiv.innerHTML = `<p>Error: ${result.error}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
